@@ -6,11 +6,32 @@ import os
 import json
 import random
 from image_synthesis.utils.misc import instantiate_from_config
+import torchvision.datasets as datasets
 
 def load_img(filepath):
     img = Image.open(filepath).convert('RGB')
     return img
 
+class ImageNetDataset(datasets.ImageFolder):
+    def __init__(self, data_root, im_preprocessor_config):
+    	self.root = os.path.join(data_root, phase)
+	print(self.root)
+    
+        self.transform = instantiate_from_config(im_preprocessor_config)
+        super(ImageNetDataset, self).__init__(root=self.root)
+ 
+    def __getitem__(self, index):
+        # image_name = self.imgs[index][0].split('/')[-1]
+        image = super(ImageNetDataset, self).__getitem__(index)[0]
+        image = self.transform(image)['image']
+        data = {
+                'image': np.transpose(image.astype(np.float32), (2, 0, 1)),
+                }
+        return data
+
+
+
+"""
 class ImageNetDataset(Dataset):
     def __init__(self, data_root, input_file, phase = 'train', im_preprocessor_config=None):
         self.transform = instantiate_from_config(im_preprocessor_config)
@@ -53,3 +74,4 @@ class ImageNetDataset(Dataset):
                 'label': A_label,
                 }
         return data
+	"""

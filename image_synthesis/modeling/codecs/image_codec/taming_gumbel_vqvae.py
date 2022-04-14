@@ -83,7 +83,7 @@ class TamingFFHQVQVAE(BaseCodec):
         config = OmegaConf.load(config_path)
         # model = instantiate_from_config(config.model)
         model = Net2NetTransformer(**config.model.params)
-        sd = torch.load(ckpt_path, map_location="cpu")["state_dict"]
+        sd = torch.load(ckpt_path, map_location="cpu")
         model.load_state_dict(sd, strict=False)
         if (isinstance(model, Net2NetTransformer)):
             model = model.first_stage_model

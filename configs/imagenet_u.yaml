@@ -1,16 +1,13 @@
 # change from o4
 model:
-  target: image_synthesis.modeling.models.conditional_dalle.C_DALLE
+  target: image_synthesis.modeling.models.unconditional_dalle.UC_DALLE
   params:
     content_info: {key: image}
-    condition_info: {key: label}
     content_codec_config: 
       target: image_synthesis.modeling.codecs.image_codec.taming_gumbel_vqvae.TamingVQVAE
       params:
-        trainable: False
+        trainable: True
         token_shape: [16, 16]
-        config_path: 'OUTPUT/pretrained_model/taming_dvae/vqgan_imagenet_f16_16384.yaml'
-        ckpt_path: 'OUTPUT/pretrained_model/taming_dvae/vqgan_imagenet_f16_16384.pth'
         num_tokens: 16384
         quantize_number: 974
         mapping_path: './help_folder/statistics/taming_vqvae_974.pt'
@@ -25,12 +22,10 @@ model:
         mask_weight: [1, 1]    # the loss weight on mask region and non-mask region
 
         transformer_config:
-          target: image_synthesis.modeling.transformers.transformer_utils.Condition2ImageTransformer
+          target: image_synthesis.modeling.transformers.transformer_utils.UnCondition2ImageTransformer
           params:
-            attn_type: 'selfcondition'
+            attn_type: 'self'
             n_layer: 24
-            class_type: 'adalayernorm'
-            class_number: 1000
             content_seq_len: 256  # 16 x 16
             content_spatial_size: [16, 16]
             n_embd: 512 # the dim of embedding dims   # both this and content_emb_config
@@ -41,12 +36,6 @@ model:
             timestep_type: 'adalayernorm'    # adainsnorm or adalayernorm and abs
             mlp_hidden_times: 4
             mlp_type: 'conv_mlp'
-        condition_emb_config:
-          target: image_synthesis.modeling.embeddings.class_embedding.ClassEmbedding
-          params:
-            num_embed: 1000 # 
-            embed_dim: 512
-            identity: True
         content_emb_config:
           target: image_synthesis.modeling.embeddings.dalle_mask_image_embedding.DalleMaskImageEmbedding
           params:
@@ -97,15 +86,14 @@ solver:
         warmup: 5000 
 
 dataloader:
-  data_root: /mnt/blob/datasets/ImageNet-2012
+  data_root: /data/imagenet
   batch_size: 32
   num_workers: 4
   train_datasets: # a list of configures, so we can combine several schedulers
     - target: image_synthesis.data.imagenet_dataset.ImageNetDataset
       params:
-        data_root: /mnt/blob/datasets/ImageNet-2012
-        phase: train                                          ###########
-	input_file: ILSVRC2012_name_train.txt
+        data_root: /data/imagenet
+	phase: train
         im_preprocessor_config:
           target: image_synthesis.data.utils.image_preprocessor.DalleTransformerPreprocessor
           params:
@@ -114,9 +102,8 @@ dataloader:
   validation_datasets:
     - target: image_synthesis.data.imagenet_dataset.ImageNetDataset
       params:
-        data_root: /mnt/blob/datasets/ImageNet-2012
-        phase: val
-	input_file: ILSVRC2012_name_val.txt
+        data_root: /data/imagenet
+	phase: val
         im_preprocessor_config:
           target: image_synthesis.data.utils.image_preprocessor.DalleTransformerPreprocessor
           params:
