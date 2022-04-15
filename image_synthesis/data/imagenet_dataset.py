@@ -7,15 +7,16 @@ import json
 import random
 from image_synthesis.utils.misc import instantiate_from_config
 import torchvision.datasets as datasets
+from torchvision import transforms
 
 def load_img(filepath):
     img = Image.open(filepath).convert('RGB')
     return img
 
 class ImageNetDataset(datasets.ImageFolder):
-    def __init__(self, data_root, im_preprocessor_config):
-    	self.root = os.path.join(data_root, phase)
-	print(self.root)
+    def __init__(self, data_root, phase = 'train', im_preprocessor_config = None):
+        self.root = os.path.join(data_root, phase)
+        print(self.root)
     
         self.transform = instantiate_from_config(im_preprocessor_config)
         super(ImageNetDataset, self).__init__(root=self.root)
@@ -23,7 +24,16 @@ class ImageNetDataset(datasets.ImageFolder):
     def __getitem__(self, index):
         # image_name = self.imgs[index][0].split('/')[-1]
         image = super(ImageNetDataset, self).__getitem__(index)[0]
-        image = self.transform(image)['image']
+        if self.transform is not None:
+            image = self.transform(image)['image']
+        else:
+            t = []
+            t.append(transforms.Resize(256, interpolation=3)) # to maintain same ratio w.r.t. 224 images
+            t.append(transforms.CenterCrop(256))
+            transform = transforms.Compose(t)
+
+            image = transform(image)
+        image = np.array(image)
         data = {
                 'image': np.transpose(image.astype(np.float32), (2, 0, 1)),
                 }

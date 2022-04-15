@@ -40,6 +40,8 @@ class Solver(object):
         self.model = model 
         self.dataloader = dataloader
         self.logger = logger
+        total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+        print("# OF TRAINABLE PARAMETERS" + str(total_params))
         
         self.max_epochs = config['solver']['max_epochs']
         self.save_epochs = config['solver']['save_epochs']

@@ -6,7 +6,7 @@ model:
     content_codec_config: 
       target: image_synthesis.modeling.codecs.image_codec.taming_gumbel_vqvae.TamingVQVAE
       params:
-        trainable: True
+        trainable: False
         token_shape: [16, 16]
         num_tokens: 16384
         quantize_number: 974
@@ -25,11 +25,11 @@ model:
           target: image_synthesis.modeling.transformers.transformer_utils.UnCondition2ImageTransformer
           params:
             attn_type: 'self'
-            n_layer: 24
+            n_layer: 3
             content_seq_len: 256  # 16 x 16
             content_spatial_size: [16, 16]
-            n_embd: 512 # the dim of embedding dims   # both this and content_emb_config
-            n_head: 16 
+            n_embd: 128 # the dim of embedding dims   # both this and content_emb_config
+            n_head: 8
             attn_pdrop: 0.0
             resid_pdrop: 0.0
             block_activate: GELU2
@@ -41,7 +41,7 @@ model:
           params:
             num_embed: 974
             spatial_size: !!python/tuple [32, 32]
-            embed_dim: 512
+            embed_dim: 128
             trainable: True
             pos_emb_type: embedding
 
@@ -86,14 +86,14 @@ solver:
         warmup: 5000 
 
 dataloader:
-  data_root: /data/imagenet
-  batch_size: 32
+  data_root: /home/data/imagenet
+  batch_size: 64
   num_workers: 4
   train_datasets: # a list of configures, so we can combine several schedulers
     - target: image_synthesis.data.imagenet_dataset.ImageNetDataset
       params:
         data_root: /data/imagenet
-	phase: train
+        phase: train
         im_preprocessor_config:
           target: image_synthesis.data.utils.image_preprocessor.DalleTransformerPreprocessor
           params:
@@ -102,8 +102,8 @@ dataloader:
   validation_datasets:
     - target: image_synthesis.data.imagenet_dataset.ImageNetDataset
       params:
-        data_root: /data/imagenet
-	phase: val
+        data_root: /home/data/imagenet
+        phase: val
         im_preprocessor_config:
           target: image_synthesis.data.utils.image_preprocessor.DalleTransformerPreprocessor
           params:
