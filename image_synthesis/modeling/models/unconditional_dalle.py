@@ -219,6 +219,18 @@ class UC_DALLE(nn.Module):
         name='none',
         **kwargs
     ):
-        input = self.prepare_input(batch)
-        output = self.transformer(input, **kwargs)
+        #input = self.prepare_input(batch)
+        #output = self.transformer(input, **kwargs)
+        output = {}
+        output['logits'] = torch.rand([128, 975, 256], dtype = torch.float32, device = self.device, requires_grad = True)
+        output['loss'] = torch.rand(1, dtype=torch.float32, device = self.device, requires_grad = True)
+        """
+        print(output.keys())
+        print(output['logits'].size())
+        print(output['loss'].size())
+        print(output['logits'].dtype)
+        print(output['loss'].dtype)
+        print(output['loss'])
+        print(output.size())
+        """
         return output
